@@ -1,15 +1,23 @@
 CC=clang
 CFLAGS=-g
+COMMON_OBJS = common.o
 
-all: tcpc tcps
+all: $(COMMON_OBJS) tcpc tcps server client
 
+common.o: common.h common.c
+	$(CC) $(CFLAGS) -c common.c
 
-tcpc: tcpclient.c
-	$(CC) $(CFLAGS) -o tcpc tcpclient.c
+tcpc: tcpclient.c $(COMMON_OBJS)
+	$(CC) $(CFLAGS) -o tcpc tcpclient.c $(COMMON_OBJS)
 
-tcps: tcpserver.c
-	$(CC) $(CFLAGS) -o tcps tcpserver.c
+tcps: tcpserver.c $(COMMON_OBJS)
+	$(CC) $(CFLAGS) -o tcps tcpserver.c $(COMMON_OBJS)
 
+server: server.c $(COMMON_OBJS)
+	$(CC) $(CFLAGS) -o server server.c $(COMMON_OBJS)
+
+client: client.c $(COMMON_OBJS)
+	$(CC) $(CFLAGS) -o client client.c $(COMMON_OBJS)
 
 clean:
-	rm -rf *.dSYM tcpc tcps
+	rm -rf *.o *.dSYM tcpc tcps server client
