@@ -4,7 +4,7 @@
 #define BUFSIZE 4096
 #define SERVER_BACKLOG 1
 
-void receive_msg(int client_socket);
+int receive_msg(int client_socket);
 int server_start(void);
 int accept_new_connection(int server_socket, char *client_address);
 
@@ -47,7 +47,12 @@ int main(int argc, char **argv) {
           FD_SET(client_socket, &current_sockets);
         } else {
           //write from client incomming
-          receive_msg(i);
+          if (receive_msg(i)) {
+            FD_CLR(i, &current_sockets);
+            tmp = find_node(room, i);
+            remove_node(&room, tmp);
+            printf("Client disconnected\n");
+          }
         }
       }
     }
@@ -58,7 +63,7 @@ int main(int argc, char **argv) {
   return EXIT_SUCCESS;
 }
 
-void receive_msg(int client_socket) {
+int receive_msg(int client_socket) {
   char buffer[MAXLINE];
   bzero(buffer, MAXLINE);
   read(client_socket, buffer, sizeof(buffer));
@@ -67,7 +72,7 @@ void receive_msg(int client_socket) {
   }
   printf("user ip %s: %s", "todo", buffer);
   bzero(buffer, MAXLINE);
-  return;
+  return 0;
 }
 
 int server_start(void) {

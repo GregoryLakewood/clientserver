@@ -2,7 +2,7 @@ CC=clang
 CFLAGS=-g
 COMMON_OBJS = common.o linkedlist.o
 
-all: $(COMMON_OBJS) tcpc tcps server client
+all: $(COMMON_OBJS) server client
 
 common.o: common.h common.c
 	$(CC) $(CFLAGS) -c common.c
