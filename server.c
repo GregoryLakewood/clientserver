@@ -32,22 +32,30 @@ int main(int argc, char **argv) {
     }
 
     for (int i = 0; i < (MAXBUFFER + 1); i++) {
-      if (i == server_socket) {
-        // new connection
-        char client_address[MAXLINE + 1];
-        int client_socket = accept_new_connection(server_socket, client_address);
+      if (FD_ISSET(i, &ready_sockets)) {
+        if (i == server_socket) {
+          //new connection
+          char client_address[MAXLINE + 1];
+          int client_socket =
+              accept_new_connection(server_socket, client_address);
+          tmp = insert_at_head(
+              &room, create_new_node(client_socket, client_address, id));
+          printf("Connected with ip: %s ID:(%d) !\n", tmp->client_address,
+                 tmp->id);
+          id++;
 
-        tmp = insert_at_head(&room,
-                       create_new_node(client_socket, client_address, id));
-        printf("Connected with ip: %s ID:(%d) !\n", tmp->client_address, tmp->id);
-        id++;
+          FD_SET(client_socket, &current_sockets);
+        } else {
+          //write from client incomming
+          receive_msg(i);
+        }
       }
     }
 
     // printlist(room);
   }
 
-  return 0;
+  return EXIT_SUCCESS;
 }
 
 void receive_msg(int client_socket) {
@@ -89,35 +97,3 @@ int accept_new_connection(int server_socket, char *client_address) {
 
   return client_socket;
 }
-
-/*
-ready_sockets = current_sockets;
-
-    if (select(MAXBUFFER + 1, &ready_sockets, NULL, NULL, NULL) < 0) {
-      perror("Select Failed!");
-      exit(EXIT_FAILURE);
-    }
-
-    for (int i = 0; i < (MAXBUFFER + 1); i++) {
-      if (FD_ISSET(i, &ready_sockets)) {
-        if (i == server_socket) {
-          // this is new connection
-          check(client_socket = accept(server_socket, (SA *)&client_addr,
-                                       (socklen_t *)&addr_size),
-                "Accept Failed!");
-          client_arr[n] = malloc(sizeof(struct client));
-          client_arr[n]->client_addr = (SA *)&client_addr;
-          client_arr[n]->client_socket = client_socket;
-          inet_ntop(AF_INET, &client_addr, client_arr[n]->client_address,
-                    MAXLINE);
-          printf("Connected with ip: %s!\n", client_arr[n]->client_address);
-          n++;
-          FD_SET(client_socket, &current_sockets);
-        } else {
-          // this is signal from client
-          receive_msg(i);
-          FD_CLR(i, &current_sockets);
-        }
-      }
-    }
-*/
