@@ -1,7 +1,5 @@
 #include "common.h"
 
-#define MAXMSG 127
-
 void handle_connection(int server_socket);
 
 int main(int argc, char **argv) {
@@ -26,5 +24,15 @@ int main(int argc, char **argv) {
 }
 
 void handle_connection(int server_socket) {
-  char buffer[MAXMSG];
+    char buff[MAXLINE];
+    int n;
+    for (;;) {
+        bzero(buff, sizeof(buff));
+        printf("Enter the string : ");
+        n = 0;
+        while ((buff[n++] = getchar()) != '\n')
+            ;
+        write(server_socket, buff, sizeof(buff));
+        bzero(buff, sizeof(buff));
+    }
 }

@@ -1,25 +1,55 @@
 #include "common.h"
+#include "linkedlist.h"
 
 #define BUFSIZE 4096
 #define SERVER_BACKLOG 1
 
-struct client {
-  int client_socket;
-  SA *client_addr;
-  char client_address[MAXLINE];
-  char client_name[MAXLINE];
-};
-
-void handle_connection(int client_socket);
+void receive_msg(int client_socket);
+int server_start(void);
 
 int main(int argc, char **argv) {
-  int server_socket, client_socket, addr_size;
-  addr_size = sizeof(SA_IN);
-  SA_IN server_addr, client_addr;
+  node_t *room = NULL;
+  node_t *tmp;
 
-  struct client *client_arr[MAXBUFFER];
-  bzero(client_arr, sizeof(struct client));
-  int n = 0;
+  int server_socket, client_socket, addr_size;
+  SA_IN client_addr;
+
+  server_socket = server_start();
+
+  fd_set current_sockets, ready_sockets;
+  FD_ZERO(&current_sockets);
+  FD_SET(server_socket, &current_sockets);
+
+  printf("Server started.\n");
+
+  int n;
+  while (1) {
+    check(client_socket = accept(server_socket, (SA *)&client_addr,
+                                 (socklen_t *)&addr_size),
+          "Accept Failed!");
+    insert_at_head(&room, create_new_node(client_socket, (SA *)&client_addr));
+    tmp = find_node(room, client_socket);
+    tmp->value = n;
+    n++;
+    printf("Connected with ip: %s! %d\n", tmp->client_address, tmp->value);
+    printlist(room);
+  }
+
+  return 0;
+}
+
+void receive_msg(int client_socket) {
+  char buffer[MAXLINE];
+  bzero(buffer, MAXLINE);
+  read(client_socket, buffer, sizeof(buffer));
+  printf("user ip %s: %s", "todo", buffer);
+  bzero(buffer, MAXLINE);
+  return;
+}
+
+int server_start(void) {
+  int server_socket;
+  SA_IN server_addr;
 
   check(server_socket = socket(AF_INET, SOCK_STREAM, 0),
         "Failed to create socket");
@@ -32,14 +62,11 @@ int main(int argc, char **argv) {
         "Bind Failed!");
   check(listen(server_socket, SERVER_BACKLOG), "Listen Failed!");
 
-  fd_set current_sockets, ready_sockets;
-  FD_ZERO(&current_sockets);
-  FD_SET(server_socket, &current_sockets);
+  return server_socket;
+}
 
-  printf("Server started.\n");
-
-  while (1) {
-    ready_sockets = current_sockets;
+/*
+ready_sockets = current_sockets;
 
     if (select(MAXBUFFER + 1, &ready_sockets, NULL, NULL, NULL) < 0) {
       perror("Select Failed!");
@@ -60,20 +87,12 @@ int main(int argc, char **argv) {
                     MAXLINE);
           printf("Connected with ip: %s!\n", client_arr[n]->client_address);
           n++;
+          FD_SET(client_socket, &current_sockets);
         } else {
           // this is signal from client
-          handle_connection(i);
+          receive_msg(i);
+          FD_CLR(i, &current_sockets);
         }
       }
     }
-    handle_connection(client_arr);
-  }
-
-  return 0;
-}
-
-void handle_connection(int client_socket) {
-
-  printf("IP number %s joined", client_socket
-  return;
-}
+*/
