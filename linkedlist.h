@@ -4,16 +4,15 @@
 #include "common.h"
 
 #ifndef __null
-#define NULL ((void *)0)
+// #define NULL ((void *)0)
 #endif /* NULL */
 
 struct node {
   int client_socket;
-  SA *client_addr;
   char client_address[MAXLINE];
   char *client_name;
 
-  int value;
+  int id;
 
   struct node *next;
   struct node *prev;
@@ -21,7 +20,7 @@ struct node {
 typedef struct node node_t;
 
 void printlist(node_t *head);
-node_t *create_new_node(int client_socket, SA *client_addr);
+node_t *create_new_node(int client_socket, char *client_address, int id);
 node_t *insert_at_head(node_t **head, node_t *node_to_insert);
 void remove_node(node_t **head, node_t *node_to_remove);
 node_t *find_node(node_t *head, int client_socket);

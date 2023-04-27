@@ -4,19 +4,19 @@ void printlist(node_t *head) {
   node_t *temporary = head;
 
   while (temporary != NULL) {
-    printf("%s(%d) - ", temporary->client_address, temporary->value);
+    printf("%s(%d) - ", temporary->client_address, temporary->id);
     temporary = temporary->next;
   }
   printf("\n");
 }
 
-node_t *create_new_node(int client_socket, SA *client_addr) {
+node_t *create_new_node(int client_socket, char *client_address, int id) {
   node_t *result = malloc(sizeof(node_t));
 
   result->client_socket = client_socket;
-  inet_ntop(AF_INET, &client_addr, result->client_address, MAXLINE);
-  result->client_addr = client_addr;
+  strcpy(result->client_address, client_address);
   result->client_name = "default";
+  result->id = id;
 
   result->next = NULL;
   result->prev = NULL;

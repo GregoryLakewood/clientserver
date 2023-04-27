@@ -6,13 +6,13 @@
 
 void receive_msg(int client_socket);
 int server_start(void);
+int accept_new_connection(int server_socket, char *client_address);
 
 int main(int argc, char **argv) {
   node_t *room = NULL;
   node_t *tmp;
 
-  int server_socket, client_socket, addr_size;
-  SA_IN client_addr;
+  int server_socket;
 
   server_socket = server_start();
 
@@ -22,17 +22,29 @@ int main(int argc, char **argv) {
 
   printf("Server started.\n");
 
-  int n;
+  int id = 1;
   while (1) {
-    check(client_socket = accept(server_socket, (SA *)&client_addr,
-                                 (socklen_t *)&addr_size),
-          "Accept Failed!");
-    insert_at_head(&room, create_new_node(client_socket, (SA *)&client_addr));
-    tmp = find_node(room, client_socket);
-    tmp->value = n;
-    n++;
-    printf("Connected with ip: %s! %d\n", tmp->client_address, tmp->value);
-    printlist(room);
+    ready_sockets = current_sockets;
+
+    if (select(MAXBUFFER + 1, &ready_sockets, NULL, NULL, NULL) < 0) {
+      perror("Select Failed!");
+      exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < (MAXBUFFER + 1); i++) {
+      if (i == server_socket) {
+        // new connection
+        char client_address[MAXLINE + 1];
+        int client_socket = accept_new_connection(server_socket, client_address);
+
+        tmp = insert_at_head(&room,
+                       create_new_node(client_socket, client_address, id));
+        printf("Connected with ip: %s ID:(%d) !\n", tmp->client_address, tmp->id);
+        id++;
+      }
+    }
+
+    // printlist(room);
   }
 
   return 0;
@@ -63,6 +75,19 @@ int server_start(void) {
   check(listen(server_socket, SERVER_BACKLOG), "Listen Failed!");
 
   return server_socket;
+}
+
+int accept_new_connection(int server_socket, char *client_address) {
+  int addr_size = sizeof(SA_IN);
+  int client_socket;
+  SA_IN client_addr;
+
+  check(client_socket =
+            accept(server_socket, (SA *)&client_addr, (socklen_t *)&addr_size),
+        "accept failed");
+  inet_ntop(AF_INET, &client_addr, client_address, MAXLINE);
+
+  return client_socket;
 }
 
 /*
