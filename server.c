@@ -62,6 +62,9 @@ void receive_msg(int client_socket) {
   char buffer[MAXLINE];
   bzero(buffer, MAXLINE);
   read(client_socket, buffer, sizeof(buffer));
+  if ((strncmp(buffer, "exit", 4)) == 0) {
+    return -1;
+  }
   printf("user ip %s: %s", "todo", buffer);
   bzero(buffer, MAXLINE);
   return;

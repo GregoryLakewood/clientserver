@@ -19,8 +19,6 @@ int main(int argc, char **argv) {
   printf("Connected to server!\n");
 
   handle_connection(server_socket);
-
-  close(server_socket);
 }
 
 void handle_connection(int server_socket) {
@@ -33,6 +31,10 @@ void handle_connection(int server_socket) {
         while ((buff[n++] = getchar()) != '\n')
             ;
         write(server_socket, buff, sizeof(buff));
+        if ((strncmp(buff, "exit", 4)) == 0) {
+            close(server_socket);
+            exit(EXIT_SUCCESS);
+        }
         bzero(buff, sizeof(buff));
     }
 }
