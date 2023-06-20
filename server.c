@@ -66,7 +66,15 @@ int main(int argc, char **argv) {
 int receive_msg(int client_socket) {
   char buffer[MAXLINE];
   bzero(buffer, MAXLINE);
-  read(client_socket, buffer, sizeof(buffer));
+  int read_return = read(client_socket, buffer, sizeof(buffer));
+  if (read_return <=0) {
+    if (read_return < 0) {
+      printf ("ERROR reading from user ip %s", "todo");
+      return -1;
+    } else {
+      return -1;
+    }
+  }
   if ((strncmp(buffer, "exit", 4)) == 0) {
     return -1;
   }

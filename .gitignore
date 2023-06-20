@@ -1,0 +1,9 @@
+# fixme
+*
+!/**/
+!*.*
+
+*.o
+
+# fixme already pushed
+.vscode/
